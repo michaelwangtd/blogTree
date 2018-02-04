@@ -20,3 +20,17 @@ ListNode* findMidNode(ListNode* head)
   
 } 
 ```
+这里写了一个python版本的实现：
+```python
+# t = [1,2,3,2,1]
+# t = [1,2,2,1]
+# t = [1,1]
+# t = [1]
+
+def detect_node(head):
+    fast = slow = head
+    while fast and fast.next:
+        slow = slow.next
+        fast = fast.next.next
+    return slow
+```
