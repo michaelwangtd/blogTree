@@ -3,6 +3,21 @@
 ```python
 start
 ```
+
+* 移位运算的作用
+```python
+"""
+    >> 每右移一位除以2
+    << 每左移一位乘以2
+    这样的操作瞬间使得代码高大上
+"""
+print((5-1)<<1) # 8
+print((5-1)>>1) # 2
+print((4-1)>>1) # 3除以2=1.5 结果为1
+print(3/2)  # 1.5
+print(3//2) # 1
+```
+
 * 随机数 and shuffle()
 ```python
 """
@@ -31,6 +46,7 @@ def shuffle(l):
     return l
 print(shuffle(t))	#[1, 5, 4, 2, 3]
 ```
+
 * 不建议使用dict里面的dic.setdefault(k,v)，不安全
 ```python
 dic = {}
