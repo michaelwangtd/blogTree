@@ -1,3 +1,33 @@
+##tree##
+
+* first tree
+```python
+"""
+二叉树：
+    层数：
+        (1)根节点的层数为0                                                                                                                          
+        (2)当前节点的层数是父节点层数+1
+    高度（深度）：树中节点的最大层数
+二叉树性质：
+    (1)非空二叉树第i层至多有2^i个节点（i>=0）
+    (2)高度为h的二叉树至多有2^(h+1)-1个节点（h>=0）
+满二叉树：
+    二叉树中所有分支节点的度数为2
+完全二叉树：
+    定义：一颗高度为h的二叉树，前h-1层都为满节点状态，第h层节点从左至右排列，空位都在右边
+    性质：
+        (1)n个节点的完全二叉树的高度h为：h=[log_2(n)]
+        (2)n个节点的完全二叉树（0<=i<=n-1）
+            1)序号为0的节点是根节点
+            2)节点i的父节点为(i-1)//2或者(i-1)>>2 (i>0)
+            3)if 2*i+1<n:2*i+1为当前节点i的左孩子
+              if 2*i+2<n:2*i+2为当前节点i的右孩子
+            4)由于根节点的下标为0，第i层元素从下标2^i-1的位置开始存放元素，连续2^i个元素属于这一层
+"""
+```
+![P1 Markdown](http://p3yz9xz5w.bkt.clouddn.com/img/blog/t1.png "层数和高度示例")</br>
+![P2 Markdown](http://p3yz9xz5w.bkt.clouddn.com/img/blog/t2.png "完全二叉树高度公式推导")
+
 * stack and queue in python
 ```python
 # list当做栈使用：
@@ -16,6 +46,7 @@ d.pop()
 d.appendleft()
 d.popleft()
 ```
+
 * binary tree traverse
 ```python
 class Node(object):
@@ -142,6 +173,7 @@ if __name__ == '__main__':
     # bt.middle_recursion(bt.root)
     # bt.back_recursion(bt.root)
 ```
+
 * binary search tree
 ```python
     """
@@ -258,11 +290,13 @@ if __name__ == '__main__':
     None
     '''
 ```
+
 * 已知某树的中序遍历，前序、后续遍历中的一种，构建该树
 > 事实上，知道任意两种方式，并不能唯一地确定树的结构，但是，只要知道中序遍历和另外任意一种遍历方式，就一定可以唯一地确定一棵树
 ```python
 
 ```
+
 * 字典树Trie Tree
 ```python
 #trie tree demo
@@ -328,4 +362,12 @@ if __name__ == '__main__':
     法轮日本AV我们知道法轮功是反中共的有力武器
     法轮****我们知道***是反**的有力武器
     """
+```
+
+* priority queue
+```python
+"""
+    优先队列：
+        定义：
+"""
 ```
