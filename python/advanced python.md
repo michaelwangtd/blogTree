@@ -1,5 +1,13 @@
 ### python相关知识补充 ###
 
+* python list 赋值“=”
+```python
+"""list列表的赋值，复制的是变量内存地址"""
+a = ['a','b','c','d','e']
+b = a
+print(id(a),id(b))# 1898804801096 1898804801096
+```
+
 * 如何判断对象为可迭代对象
 ```python
 >>> from collections import Iterable
