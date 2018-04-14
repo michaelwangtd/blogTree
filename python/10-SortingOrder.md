@@ -92,3 +92,37 @@ if __name__ == '__main__':
     print(rst)
 
 ```
+
+* 计数排序
+
+思想：利用空间换时间思想，构建统计器counter统计列表中所有出现元素的次数，元素与counter列表下标一一对应，最后扩展形成结果
+```python
+    """
+    注意：
+    不能选取字典为counter，在生成有序字典dic的时候就需要对这个“有序”负责任，
+    使用sorted()函数对list排序，这个是不被允许的
+    from collections import OrderedDict
+    dic = OrderedDict()
+    # 获取待排序数组set集合
+    setnums = sorted(list(set(nums)))
+    """
+def counterOrder(nums):
+    # 1 list形式连续化初始化counter，即使存在浪费空间的风险
+    mnum = max(nums)
+    counter = [0]*(mnum+1)
+    # 2 遍历统计计数
+    for num in nums:
+        counter[num] += 1
+    # 3 生成有序序列
+    nums = []
+    for i,v in enumerate(counter):
+        if v>0:
+            nums.extend([i]*v)
+    return nums
+
+```
+```python
+'测试:'
+nums = [1, 2, 3, 3, 2, 1, 4, 5, 4, 3, 2, 1, 4, 6, 5, 4, 3, 3, 67 ,5 ,3, 2]
+rst = [1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 6, 67]
+```
