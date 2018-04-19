@@ -11,6 +11,11 @@ __pycache__/
 *.json
 *.docx
 *.doc
+*.vsdx
+*.~vsdx
+
+# other dic
+pic/
 
 # document
 .idea/

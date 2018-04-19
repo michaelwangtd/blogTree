@@ -1,54 +1,51 @@
-##tree##
+# Tree
 
-* first tree
-```python
-"""
-二叉树：
-    层数：
-        (1)根节点的层数为0                                                                                                                          
-        (2)当前节点的层数是父节点层数+1
-    高度（深度）：树中节点的最大层数
-二叉树性质：
-    (1)非空二叉树第i层至多有2^i个节点（i>=0）
-    (2)高度为h的二叉树至多有2^(h+1)-1个节点（h>=0）
-满二叉树：
-    二叉树中所有分支节点的度数为2
-完全二叉树：
-    定义：一颗高度为h的二叉树，前h-1层都为满节点状态，第h层节点从左至右排列，空位都在右边
-    性质：
-        (1)n个节点的完全二叉树的高度h为：h=[log_2(n)]
-        (2)n个节点的完全二叉树（0<=i<=n-1）
-            1)序号为0的节点是根节点
-            2)节点i的父节点为(i-1)//2或者(i-1)>>2 (i>0)
-            3)if 2*i+1<n:2*i+1为当前节点i的左孩子
-              if 2*i+2<n:2*i+2为当前节点i的右孩子
-            4)由于根节点的下标为0，第i层元素从下标2^i-1的位置开始存放元素，连续2^i个元素属于这一层
-"""
-```
-![P1 Markdown](http://p3yz9xz5w.bkt.clouddn.com/img/blog/t1.png "层数和高度示例")</br>
-![P2 Markdown](http://p3yz9xz5w.bkt.clouddn.com/img/blog/t2.png "完全二叉树高度公式推导")
+<div align="center"><img src="http://p7erlqn6k.bkt.clouddn.com/image/jpg/python/tree/001-tree.png" height="100%" width="40%"/></div>
 
-* stack and queue in python
+* 树的基本概念
+    1. 二叉树：
+        1. 层数：树的层数从**0**开始计算
+            1. **根节点的层数为0**
+            2. 当前节点的层数是父节点层数+1
+        2. 高度（深度）：树中节点的最大层数
+    2. 二叉树性质：
+        1. 非空二叉树第i层至多有`2^i`个节点`（i>=0）`
+        2. 高度为h的二叉树至多有`2^(h+1)-1`个节点`（h>=0）`
+    3. 满二叉树：
+        1. 二叉树中所有分支节点的度数为2
+    4. 完全二叉树：
+        1. 定义：一颗高度为h的二叉树，前h-1层都为满节点状态，第h层节点从左至右排列，空位都在右边
+        2. 性质：
+            1. n个节点的完全二叉树的高度h为：`h=[log_2(n)]`
+            2. n个节点的完全二叉树`（0<=i<=n-1）`
+                1. 序号为0的节点是根节点
+                2. 节点i的父节点为`(i-1)//2`或者`(i-1)>>2 (i>0)`
+                3. `if 2*i+1<n:2*i+1`为当前节点i的左孩子
+                4. `if 2*i+2<n:2*i+2`为当前节点i的右孩子
+                5. 由于根节点的下标为0，第i层元素从下标`2^i-1`的位置开始存放元素，连续`2^i`个元素属于这一层
+        
+
+* Stack And Queue In Python
+    1. list当做栈使用：`l.append() l.pop()`
+    
+    2. list当做队列使用：`l.append() l.pop(0)`
+
+    3. 利用python内置的双端队列：
 ```python
-# list当做栈使用：
-l.append()
-l.pop()
-# list当做队列使用：
-l.append()
-l.pop(0)
-# 双端队列collection.deque实现队列的作用：
-d = deque()
-d.popleft()
-d.append()
-# 双端队列可以操作前后两端：
-d.append()
-d.pop()
-d.appendleft()
-d.popleft()
+from collections import deque
+dq = deque() # 创建双端队列
+# 四种方法
+dq.append()
+dq.pop()
+dq.appendleft()
+dq.popleft()
 ```
 
-* binary tree traverse
+* Binary Tree Traverse
+>二叉树遍历（Tree Walk）是树结构中的基础问题，具体有前序（Preorder）、中序（Inorder）、后续（Postorder）和层次（Level-order）遍历4中方式，而每种方式都有递归和非递归的实现方法。
+
 ```python
+# 树节点
 class Node(object):
     def __init__(self,data = -1):
         self.data = data
@@ -60,6 +57,7 @@ class BT(object):
         self.root = Node()
         self.queue = []
 
+    # 层次初始化二叉树
     def add(self,nlist):
         for n in nlist:
             node = Node(n)
@@ -76,6 +74,10 @@ class BT(object):
                     self.queue.append(tree_node.rc)
                     self.queue.pop(0)
 
+    """
+    二叉树遍历方法：
+    """
+    # 层次遍历
     def level_traverse(self,root):
         rst = []
         queue = []
@@ -92,6 +94,7 @@ class BT(object):
         print('level traverse:',rst)
         return rst
 
+    # 中序遍历
     def middle_traverse(self,root):
         rst = []
         stack = []
@@ -106,6 +109,7 @@ class BT(object):
                 root = node.rc# 更换root为右孩子
         return rst
 
+    # 前序遍历
     # 前序和中序方法一样，只是rst加入的位置不同
     def pre_traverse(self,root):
         rst = []
@@ -120,6 +124,7 @@ class BT(object):
             root = node.rc# 搜索右子树
         return rst
 
+    # 后续遍历
     def back_traverse(self,root):
         rst = []
         stack = []# 只对左、右孩子进行操作
@@ -137,6 +142,7 @@ class BT(object):
             rst.append(out_stack.pop())
         return rst
 
+    # 前序递归
     def pre_recursion(self,root):
         if root==None:
             return
@@ -144,6 +150,7 @@ class BT(object):
         self.pre_recursion(root.lc)
         self.pre_recursion(root.rc)
 
+    # 中序递归
     def middle_recursion(self,root):
         if root==None:
             return
@@ -151,6 +158,7 @@ class BT(object):
         print(root.data)
         self.middle_recursion(root.rc)
 
+    # 后续递归
     def back_recursion(self,root):
         if root==None:
             return
@@ -174,7 +182,21 @@ if __name__ == '__main__':
     # bt.back_recursion(bt.root)
 ```
 
-* binary search tree
+* Binary Sort Tree（Binary Search Tree）
+    1. 二叉排序树又，称二叉查找树，亦称二叉搜索树
+    
+    2. 定义:
+        1. 若左子树不为空，则左子树上所有节点的值均小于等于当前根节点的值
+        2. 若右子树不为空，则右子树上所有节点的值均大于等于当前根节点的值
+        3. 其左右子树也满足这样的性质
+        
+    3. 二叉排序树生成：
+
+    4. 二叉排序树查找：
+
+
+
+
 ```python
     """
         BST定义：
@@ -204,7 +226,7 @@ class BST(object):
 
     def add_element(self,root,data):
         cur = None# nxt为根节点，cur为nxt的父节点为空
-        nxt = root# 注意出事两个变量的设置
+        nxt = root# 注意初始两个变量的设置
 
         while nxt:# while作用找到带插入节点的父节点
             cur = nxt# 立即赋值
@@ -247,6 +269,7 @@ class BST(object):
         elif data>root.data:
             return self.recursion_search_ele(root.rc,data)
 
+    # 二叉排序树的遍历-前序
     def pre_recursion(self,root):
         rst = []
         if root==None:
@@ -258,7 +281,7 @@ class BST(object):
             if self.pre_recursion(root.rc):
                 rst.extend(self.pre_recursion(root.rc))
         return rst
-
+    # 中序遍历
     def middle_recursion(self,root):
         rst = []
         if root==None:
