@@ -44,281 +44,516 @@ dq.popleft()
 * Binary Tree Traverse
 >二叉树遍历（Tree Walk）是树结构中的基础问题，具体有前序（Preorder）、中序（Inorder）、后续（Postorder）和层次（Level-order）遍历4中方式，而每种方式都有递归和非递归的实现方法。
 
+<div align="center"><img src="http://p7erlqn6k.bkt.clouddn.com/image/jpg/python/tree/003-tree.png" height="100%" width="40%"/></div>
+
 ```python
-# 树节点
-class Node(object):
-    def __init__(self,data = -1):
-        self.data = data
-        self.lc = None
-        self.rc = None
-
-class BT(object):
+class BinaryTree(object):
     def __init__(self):
-        self.root = Node()
-        self.queue = []
+        self.root = None
 
-    # 层次初始化二叉树
-    def add(self,nlist):
-        for n in nlist:
-            node = Node(n)
-            if self.root.data == -1:
-                self.root = node
-                self.queue.append(self.root)
+    def init_complete_binary_tree(self,datas):
+        que = []
+        for data in datas:
+            node = Node(data)
+            que.append(node)
+            if self.root:
+                cur = que[0]
+                if cur.left == None:
+                    cur.left = node
+                elif cur.right == None:
+                    cur.right = node
+                    que.pop(0)
             else:
-                tree_node = self.queue[0]
-                if tree_node.lc == None:
-                    tree_node.lc = node
-                    self.queue.append(tree_node.lc)
-                else:
-                    tree_node.rc = node
-                    self.queue.append(tree_node.rc)
-                    self.queue.pop(0)
+                self.root = node
 
-    """
-    二叉树遍历方法：
-    """
-    # 层次遍历
-    def level_traverse(self,root):
+    # 前序递归
+    def preorder_recursion(self,root):
         rst = []
-        queue = []
-        if root == None:return
-        queue.append(root)
-
-        while queue:
-            node = queue.pop(0)
-            rst.append(node.data)
-            if node.lc:
-                queue.append(node.lc)
-            if node.rc:
-                queue.append(node.rc)
-        print('level traverse:',rst)
+        if root == None:
+            return rst
+        rst.append(root.data)
+        rst.extend(self.preorder_recursion(root.left))
+        rst.extend(self.preorder_recursion(root.right))
         return rst
 
-    # 中序遍历
-    def middle_traverse(self,root):
+    # 中序递归
+    def inorder_recursion(self,root):
+        rst = []
+        if root == None:
+            return rst
+        rst.extend(self.inorder_recursion(root.left))
+        rst.append(root.data)
+        rst.extend(self.inorder_recursion(root.right))
+        return rst
+
+    # 后续递归
+    def postorder_recursion(self,root):
+        rst = []
+        if root == None:
+            return rst
+        rst.extend(self.postorder_recursion(root.left))
+        rst.extend(self.postorder_recursion(root.right))
+        rst.append(root.data)
+        return rst
+
+    # 前序非递归
+    def preorder_traverse(self,root):
         rst = []
         stack = []
-
-        while root or stack:
-            while root:
-                stack.append(root)# 后续还要遍历右孩子，先将当前节点入栈
-                root = root.lc# 继续查找左孩子是否存在
-            if stack:# 说明栈顶节点的左孩子为空
-                node = stack.pop()# 弹出栈时对节点进行操作
-                rst.append(node.data)
-                root = node.rc# 更换root为右孩子
+        if root:
+            cur = root # 由于是非递归，root是唯一的，所以先要指定一个cur指向root
+            while cur or stack: # 如果这两个条件能够同时满足的话，就不需要同时用or判断了
+                while cur:
+                    rst.append(cur.data)
+                    stack.append(cur) # 将cur入栈，因为在后续还要遍历它的右子树
+                    cur = cur.left # 当赋值后的cur不能再循环，我们可以知道，当前节点的左子树为空
+                if stack:
+                    node = stack.pop() # 接上面的cur = cur.left，因为左子树为空，这时要将当前节点弹出
+                    cur = node.right # 将右子树赋值给cur
         return rst
 
-    # 前序遍历
-    # 前序和中序方法一样，只是rst加入的位置不同
-    def pre_traverse(self,root):
+    # 中序非递归
+    def inorder_traverse(self,root):
         rst = []
         stack = []
-
-        while root or stack:# 前序也使用or来连接
-            while root:
-                rst.append(root.data)
-                stack.append(root)# 当前节点先入栈
-                root = root.lc
-            node = stack.pop()# 说明当前栈顶节点左子树为空
-            root = node.rc# 搜索右子树
+        if root:
+            cur = root # 由于是非递归，root是唯一的，所以先要指定一个cur指向root
+            while cur or stack: # 前序和中序非递归遍历的写法一样，只不过rst.append()加入的时机不同
+                while cur:
+                    stack.append(cur) # 深度优先将元素先入栈
+                    cur = cur.left # 循环不能执行，说明当前元素的左子树为空
+                if stack:
+                    node = stack.pop() # 弹出栈中元素的时候，说明该元素左子树为空，这就是加入rst的时机
+                    rst.append(node.data)
+                    cur = node.right # 重新处理右子树
         return rst
 
-    # 后续遍历
-    def back_traverse(self,root):
+    # 后序非递归
+    """
+        思路：后序反转到栈其实是向右子树的DFS
+        推荐这个思路，因为不需要额外记忆后序的原理，只是将向左子树的DFS换成向右子树的DFS，
+        最后加上rst的反转就可以完成。
+    """
+    def postorder_traverse(self,root):
         rst = []
-        stack = []# 只对左、右孩子进行操作
-        out_stack = []# out_stack只操作当前节点(入栈的只是当前节点)
+        stack = []
+        if root:
+            cur = root
+            while cur or stack: # 判定条件和其他顺序的条件一样
+                while cur:
+                    rst.append(cur.data) # 根据逆栈的顺序，这里要先加当前节点
+                    stack.append(cur) # 还是先将节点入栈，因为后面有左子树要处理
+                    cur = cur.right # 注意这里是cur.right，DFS右子树
+                if stack:
+                    node = stack.pop()
+                    cur = node.left
+            # 将栈翻转过来即可
+            rst.reverse()
+        return rst
+
+    # 后续遍历（保留这个思路）
+    def back_traverse(self, root):
+        rst = []
+        stack = []  # 只对左、右孩子进行操作
+        out_stack = []  # out_stack只操作当前节点(入栈的只是当前节点)
         stack.append(root)
 
-        while stack:# 后续只有stack的判断
+        while stack:  # 后续只有stack的判断
             node = stack.pop()
             out_stack.append(node.data)
-            if node.lc:# 注意为什么先是左孩子
-                stack.append(node.lc)# 入的栈是中间栈stack
+            if node.lc:  # 注意为什么先是左孩子
+                stack.append(node.lc)  # 入的栈是中间栈stack
             if node.rc:
                 stack.append(node.rc)
         while out_stack:
             rst.append(out_stack.pop())
         return rst
 
-    # 前序递归
-    def pre_recursion(self,root):
-        if root==None:
-            return
-        print(root.data)
-        self.pre_recursion(root.lc)
-        self.pre_recursion(root.rc)
-
-    # 中序递归
-    def middle_recursion(self,root):
-        if root==None:
-            return
-        self.middle_recursion(root.lc)
-        print(root.data)
-        self.middle_recursion(root.rc)
-
-    # 后续递归
-    def back_recursion(self,root):
-        if root==None:
-            return
-        self.back_recursion(root.lc)
-        self.back_recursion(root.rc)
-        print(root.data)
+    # 层次遍历
+    def level_traverse(self):
+        rst = []
+        que = []
+        que.append(self.root)
+        while que:
+            node = que.pop(0)
+            rst.append(node.data)
+            if node.left:
+                que.append(node.left)
+            if node.right:
+                que.append(node.right)
+        return rst
 
 if __name__ == '__main__':
-    btn = [1,2,3,4,5,6]
-    # btn = [1,2,3]
-    bt = BT()
-    bt.add(btn)
-    # rst = bt.level_traverse(bt.root)
 
-    bt.middle_traverse(bt.root) #[4, 2, 5, 1, 6, 3]
-    bt.pre_traverse(bt.root)    #[1, 2, 4, 5, 3, 6]
-    bt.back_traverse(bt.root)   #[4, 5, 2, 6, 3, 1]
+    datas = [4,6,2,1,3,8,7,9,5]
+    bt = BinaryTree()
+    bt.init_complete_binary_tree(datas)
 
-    # bt.pre_recursion(bt.root)
-    # bt.middle_recursion(bt.root)
-    # bt.back_recursion(bt.root)
+    rst = bt.level_traverse() # [4, 6, 2, 1, 3, 8, 7, 9, 5]
+    # 二叉树的遍历
+    rst = bt.preorder_recursion(bt.root) # [4, 6, 1, 9, 5, 3, 2, 8, 7]
+    rst = bt.inorder_recursion(bt.root) # [9, 1, 5, 6, 3, 4, 8, 2, 7]
+    rst = bt.postorder_recursion(bt.root) # [9, 5, 1, 3, 6, 8, 7, 2, 4]
+    rst = bt.preorder_traverse(bt.root) # [4, 6, 1, 9, 5, 3, 2, 8, 7]
+    rst = bt.inorder_traverse(bt.root) # [9, 1, 5, 6, 3, 4, 8, 2, 7]
+    rst = bt.postorder_traverse(bt.root) # [9, 5, 1, 3, 6, 8, 7, 2, 4]
+    print(rst)
 ```
 
 * Binary Sort Tree（Binary Search Tree）
-    1. 二叉排序树又，称二叉查找树，亦称二叉搜索树
+    1. 二叉排序树，又称二叉查找树，亦称二叉搜索树
     
     2. 定义:
         1. 若左子树不为空，则左子树上所有节点的值均小于等于当前根节点的值
         2. 若右子树不为空，则右子树上所有节点的值均大于等于当前根节点的值
         3. 其左右子树也满足这样的性质
+    <div align="center"><img src="http://p7erlqn6k.bkt.clouddn.com/image/jpg/python/tree/002-tree.png" height="100%" width="40%"/></div>
         
-    3. 二叉排序树生成：
+    3. 前驱、后继：结点`v`的前驱是指小于`v.key`的最大关键字的结点；而一个结点`v`的后继是指大于`v.key`的最小关键字的结点。例如上图中的节点`4`的前驱为`3`，后继为`5`
+    
+    4. 如何求一个节点的后继？例如`3`的后继为`4`，而`4`的后继为`5`。
+        
+        > 对于结点x，如果其右子树不为空，那么x的后继一定是其右子树的最左边的结点。而如果x的右子树为空，并且有一个后继，那么其后继必然是x的最底层的祖先，并且后继的左孩子也是x的一个祖先，因此，为了找到这样的后继结点，只需要从x开始沿着树向上移动，直到遇到一个结点，这个结点是它的双亲的左孩子。
 
-    4. 二叉排序树查找：
+    3. 二叉排序树生成：生成BST的过程也是插入元素的过程，按照当前待插入元素大小，找到其前驱节点或后继节点。依据待插入节点与前驱节点或后继节点的关系，将元素插入到适合的分枝上。
 
+    4. 二叉排序树查找：查找分为递归和非递归的方法。
 
-
+    5. BST删除？这里后续补充。
+    
+        > 1、 如果结点z没有孩子节点，那么只需简单地将其删除，并修改父节点，用NIL来替换z；2、 如果结点z只有一个孩子，那么将这个孩子节点提升到z的位置，并修改z的父节点，用z的孩子替换z；3、 如果结点z有2个孩子，那么查找z的后继y，此外后继一定在z的右子树中，然后让y替换z。
 
 ```python
-    """
-        BST定义：
-        BST查找：递归、非递归
-        前驱、后继：结点x的前驱是指小于x.key的最大关键字的结点；而一个结点x的后继是指大于x.key的最小关键字的结点。
-        求后继节点：对于结点x，如果其右子树不为空，那么x的后继一定是其右子树的最左边的结点。而如果x的右子树为空，并且有一个后继，那么其后继必然是x的最底层的祖先，并且后继的左孩子也是x的一个祖先，因此，为了找到这样的后继结点，只需要从x开始沿着树向上移动，直到遇到一个结点，这个结点是它的双亲的左孩子。
-        BST插入：
-        BST删除：
-            1、 如果结点z没有孩子节点，那么只需简单地将其删除，并修改父节点，用NIL来替换z；
-            2、 如果结点z只有一个孩子，那么将这个孩子节点提升到z的位置，并修改z的父节点，用z的孩子替换z；
-            3、 如果结点z有2个孩子，那么查找z的后继y，此外后继一定在z的右子树中，然后让y替换z。
-        BST遍历：
-    """
 class Node(object):
     def __init__(self,data=-1):
         self.data = data
-        self.lc = None
-        self.rc = None
+        self.left = None
+        self.right = None
 
 class BST(object):
     def __init__(self):
-        self.root = None# 初始化根节点为空
+        self.root = None
 
-    def create_bst(self,datas):
+    # 1 初始化二叉排序树
+    def init_bst(self,datas):
         for data in datas:
-            self.add_element(self.root,data)
-
-    def add_element(self,root,data):
-        cur = None# nxt为根节点，cur为nxt的父节点为空
-        nxt = root# 注意初始两个变量的设置
-
-        while nxt:# while作用找到带插入节点的父节点
-            cur = nxt# 立即赋值
-            if data<nxt.data:
-                nxt = nxt.lc
+            self.add_element(data)
+    def add_element(self,data):
+        node = Node(data)
+        # 初始设定cur、nxt的思想要注意
+        cur = None
+        nxt = self.root
+        while nxt:
+            cur = nxt # 首先给cur赋值
+            if data <= cur.data:
+                nxt = cur.left
             else:
-                nxt = nxt.rc
-
-        if cur==None:# 初始树为空时cur为空
-            self.root = Node(data)
-        else:
-            if data<cur.data:# 上面只是找到待插入节点父节点，具体待插节点属于左、右子树还得判断
-                cur.lc = Node(data)
+                nxt = cur.right
+        if cur:
+            if data <= cur.data:
+                cur.left = node
             else:
-                cur.rc = Node(data)
+                cur.right = node
+        else: # 这里只是给root节点赋值
+            self.root = node
 
-    def search_element(self,data):
-        '''
-            bst search
-        '''
-        if self.root==None:
-            return None
-        tar = self.root
-        while tar:
-            if data == tar.data:
-                return tar.data
-            elif data < tar.data:
-                tar = tar.lc
-            elif data > tar.data:
-                tar = tar.rc
-        return None
-                
-    def recursion_search_ele(self,root,data):
-        if root==None:
-            return None
-        if root.data == data:
-            return data
-        elif data<root.data:
-            return self.recursion_search_ele(root.lc,data)
-        elif data>root.data:
-            return self.recursion_search_ele(root.rc,data)
+    # 2 二叉排序树查找 -- traverse
+    def search_bst(self,target):
+        root = self.root
+        if root:
+            while root:
+                if target == root.data:
+                    return target
+                if target < root.data:
+                    root = root.left
+                else:
+                    root = root.right
+        return -1
 
-    # 二叉排序树的遍历-前序
-    def pre_recursion(self,root):
-        rst = []
-        if root==None:
-            return None
+    # 3 二叉排序树查找 -- recursion
+    def search_recursion(self,target):
+        root = self.root
+        return self.helper(root,target)
+    def helper(self,root,target):
+        if root == None:
+            return -1
+        if target == root.data:
+            return target
+        elif target < root.data:
+            return self.helper(root.left,target)
         else:
-            rst.append(root.data)
-            if self.pre_recursion(root.lc):
-                rst.extend(self.pre_recursion(root.lc))
-            if self.pre_recursion(root.rc):
-                rst.extend(self.pre_recursion(root.rc))
-        return rst
-    # 中序遍历
-    def middle_recursion(self,root):
+            return self.helper(root.right,target)
+
+    # 层次遍历
+    def level_traverse(self):
         rst = []
-        if root==None:
-            return None
-        else:
-            if self.middle_recursion(root.lc):
-                rst.extend(self.middle_recursion(root.lc))
-            rst.append(root.data)
-            if self.middle_recursion(root.rc):
-                rst.extend(self.middle_recursion(root.rc))
+        que = []
+        que.append(self.root)
+        while que:
+            node = que.pop(0)
+            rst.append(node.data)
+            if node.left:
+                que.append(node.left)
+            if node.right:
+                que.append(node.right)
         return rst
 
 if __name__ == '__main__':
-    t = [90,20,25,5,150]
-    pre = [90,20,5,25,150]
-    middle = [5,20,25,90,150]
-
+    datas = [5,3,1,4,8,2,9,6]
     bst = BST()
-    bst.create_bst(t)
-    print('pre:',bst.pre_recursion(bst.root))
-    print('middle:',bst.middle_recursion(bst.root))
+    bst.init_bst(datas) # 初始化二叉查找树
+    rst = bst.level_traverse()
+    print(rst) # [5, 3, 8, 1, 4, 6, 9, 2]
+    # 两种查找方式
+    print(bst.search_bst(8))
+    print(bst.search_recursion(4))
+```
 
-    print(bst.search_element(25))
-    print(bst.recursion_search_ele(bst.root,50))
-    '''
-    pre: [90, 20, 5, 25, 150]
-    middle: [5, 20, 25, 90, 150]
-    25
-    None
-    '''
+* 二叉树的序列化与反序列化
+
+> 序列化与反序列化：将对象输出到文件，再从文件将对象恢复的过程。
+
+> 序列化与反序列化重点在对象的保存、快速恢复。
+
+>  {3,9,20,#,#,15,7}
+
+<div align="center"><img src="http://p7erlqn6k.bkt.clouddn.com/image/jpg/python/tree/004-tree.png" height="100%" width="20%"/></div>
+两个算法都是**利用两个队列level、templevel交替进行层序遍历**的。要注意下面这种树结构，有些算法（据说是阿里一个经验丰富的面试官的代码）在这样情况下恐怕要出错。我的代码进行了修正，将在下面代码处标出。
+<div align="center"><img src="http://p7erlqn6k.bkt.clouddn.com/image/jpg/python/tree/005-tree.png" height="100%" width="25%"/></div>
+
+>{3,9,20,#,#,15,7,#,#,#,#,5}
+
+```python
+"""序列化"""
+def serialize(root):
+    rst = []
+    if root:
+        level = []
+        level.append(root)
+        # 同时判断level是否全为None：[None,None,None]
+        while level and level.count(None) < len(level):
+            templevel = []
+            for ele in level:
+                if ele:
+                    rst.append(str(ele.data))
+                    templevel.append(ele.left)
+                    templevel.append(ele.right)
+                else:
+                    rst.append('#')
+                    templevel.append(None) # 这里要将None加入templevel
+                    templevel.append(None)
+            level = templevel
+        i = len(rst)-1
+        while rst[i] == '#':
+            i -= 1
+        rst = rst[:i+1]
+    rst = '{' + ','.join(rst) + '}'
+    return rst
+
+"""反序列化"""
+def deserialize(datas):
+    root = None
+    if datas:
+        datas = datas.replace('{','').replace('}','').strip().split(',')
+        if datas:
+            level = []
+            templevel = []
+            root = Node(datas.pop(0))
+            level.append(root)
+            while datas: # 外循环是数据
+                while level:
+                    cur = level.pop(0)
+                    if datas:
+                        data = datas.pop(0)
+                        node = None if data == '#' else Node(int(data))
+                        if cur: # 如果cur为空就不能添加后代节点
+                            cur.left = node
+                        templevel.append(node)
+                    if datas:
+                        data = datas.pop(0)
+                        node = None if data == '#' else Node(int(data))
+                        if cur:
+                            cur.right = node
+                        templevel.append(node)
+                    if not datas: # 这个判断只是跳出内循环
+                        break
+                level = templevel
+                templevel = []
+    return root
+```
+
+* 求二叉树的最大深度和最小深度
+>有必要明确一下深度的概念。深度也叫高度，是一个二叉树层数的最大值，根节点的层数为0，这样来定义的话，下面的一个二叉树的高度（深度）为3。不知为什么，lintcode上下面这颗二叉树的最大深度为4，最小深度为1。不过不影响算法的计算过程，仅仅是初始化depth=0还是depth=1。
+
+<div align="center"><img src="http://p7erlqn6k.bkt.clouddn.com/image/jpg/python/tree/006-tree.png" height="100%" width="25%"/></div>
+> {3,#,20,#,#,15,7,#,#,#,#,5}
+
+这里的代码也是利用level和templevel两个队列交替来层次遍历。看来这是一个可靠的方法。
+```python
+'''最大深度'''
+def maxdepth(root):
+    depth = 0
+    if root:
+        level = []
+        templevel = []
+        level.append(root)
+        while level:
+            node = level.pop()
+            if node.left:
+                templevel.append(node.left)
+            if node.right:
+                templevel.append(node.right)
+            if not level:
+                depth += 1
+                level = templevel
+                templevel = []
+    return depth
+
+'''最小深度'''
+def mindepth(root):
+    depth = 0
+    if root:
+        level = []
+        templevel = []
+        level.append(root)
+        while level:
+            node = level.pop(0)
+            # 一旦有子节点为None，立马停止循环，并输出
+            if not node.left or not node.right:
+                depth += 1
+                break
+            if node.left:
+                templevel.append(node.left)
+            if node.right:
+                templevel.append(node.right)
+            if not level:
+                depth += 1
+                level = templevel
+                templevel = []
+    return depth
+
+```
+
+* 最近公共祖先（Lowest Common Ancestor）
+
+> 已知根节点root和两个元素num1,num2，找出两个元素的最近公共祖先
+
+> 递归
+
+```python
+def lowest_common_ancestor(root,num1,num2):
+    if root:
+        if root.data == num1 or root.data == num2:
+            return root
+        node1 = lowest_common_ancestor(root.left,num1,num2)
+        node2 = lowest_common_ancestor(root.right,num1,num2)
+        if node1 and node2:
+            return root
+        else:
+            return node1 if node1 else node2
+    return None
 ```
 
 * 已知某树的中序遍历，前序、后续遍历中的一种，构建该树
 > 事实上，知道任意两种方式，并不能唯一地确定树的结构，但是，只要知道中序遍历和另外任意一种遍历方式，就一定可以唯一地确定一棵树
-```python
 
+1 已知前序和中序，构建二叉树
+> 前序[5,3,1,2,4,6,7]
+
+> 中序[1,2,3,4,5,6,7] 
+> <div align="center"><img src="http://p7erlqn6k.bkt.clouddn.com/image/jpg/python/tree/009-tree.png" height="100%" width="30%"/></div>
+
+```python
+"""
+前序+中序
+"""
+def build_tree(preorder,inorder):
+    if preorder:
+        # 注意end指针取值
+        pre_start,pre_end,in_start,in_end = 0,len(preorder),0,len(inorder)
+        return helper(preorder,pre_start,pre_end,inorder,in_start,in_end)
+    return None
+
+def helper(preorder,pre_start,pre_end,inorder,in_start,in_end):
+    # 判断的是中序的start和end
+    if in_start == in_end:
+        # 因为end本来就多出一位，如果start==end，说明这个子树已经没有元素了
+        return None
+    mid = in_start
+    while mid < in_end:
+        if inorder[mid] == preorder[pre_start]:
+            break
+        mid += 1
+    root = Node(inorder[mid])
+    # 边界取值规律为：左闭右开，所以end取值要+1
+    root.left = helper(preorder,pre_start+1,pre_start+mid-in_start+1,inorder,in_start,mid)
+    root.right = helper(preorder,pre_start+mid-in_start+1,pre_end,inorder,mid+1,in_end)
+    return root
+# {5,3,6,1,4,#,7,#,2}
 ```
+
+2 已知后续与中序，构建二叉树
+> 前序[2,4,1,3,5]
+
+> 中序[4,2,5,3,1] 
+> <div align="center"><img src="http://p7erlqn6k.bkt.clouddn.com/image/jpg/python/tree/010-tree.png" height="100%" width="25%"/></div>
+
+注意体会这里的代码，因为中序的规律是不变的，始终“左子树+root+右子树”。而后序序列为“左子树+右子树+root”，由于root在后面不容易计算，这里使用一个技巧，在算法开始前先将postorder后续进行一个**翻转**操作reverse，这样postorder的顺序变成“root+右子树+左子树”。另外，翻转后这里要体会右子树post_end和左子树post_start变量的计算，这里使用**“-”减法**进行计算。
+```python
+"""
+后序+中序
+"""
+def build_tree(postorder,inorder):
+    if postorder:
+        # 注意这里的翻转操作，这个操作来源二叉树非递归后序遍历的做法
+        postorder.reverse()
+        # end 指针同样+1
+        post_start,post_end,in_start,in_end = 0,len(postorder),0,len(inorder)
+        return helper(postorder,post_start,post_end,inorder,in_start,in_end)
+    return None
+
+def helper(postorder,post_start,post_end,inorder,in_start,in_end):
+    # 判断的是中序的start和end
+    if in_start == in_end:
+        return None
+    mid = in_start
+    while mid < in_end:
+        if inorder[mid] == postorder[post_start]:
+            break
+        mid += 1
+    root = Node(inorder[mid])
+    # 注意这里right:post_end和left:post_start的计算使用了减法：post_end-(mid-in_start)
+    root.right = helper(postorder,post_start+1,post_end-(mid-in_start),inorder,mid+1,in_end)
+    root.left = helper(postorder,post_end-(mid-in_start),post_end,inorder,in_start,mid)
+    return root
+# {1,2,3,#,4,#,5}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 * 字典树Trie Tree
 ```python
