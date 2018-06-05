@@ -1,4 +1,25 @@
 ﻿## review ##
+
+* python堆接口调用（实现最大堆、最小堆）
+```python
+h = [7,3,5,2,1]
+## 最小堆
+# 初始化最小堆
+heapq.heapify(h) # [1, 2, 5, 7, 3]
+# 堆中添加元素
+heapq.heappush(h,6) # [1, 2, 5, 7, 3, 6]
+# 删除堆顶最小元素
+mixnum = heapq.heappop(h) # [2, 3, 5, 7, 6]
+
+## 最大堆
+h = [2,1,7,4,6]
+h = [-item for item in h]
+heapq.heapify(h) # [-7, -6, -2, -4, -1]
+heapq.heappush(h,-(5)) # [-7, -6, -5, -4, -1, -2]
+maxnum = heapq.heappop(h) # [-6, -4, -5, -2, -1]
+maxnum = -maxnum # 7
+```
+
 * 单例模式
 ```python
 class Singleton(object):

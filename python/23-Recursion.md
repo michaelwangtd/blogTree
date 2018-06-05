@@ -1,5 +1,7 @@
 ﻿# Recursion
 
+<div align="center"><img src="http://p7erlqn6k.bkt.clouddn.com/image/jpg/python/dg/001-dg.jpg" height="100%" width="40%"/></div>
+
 * __定义：程序调用自身的一种编程技巧__
 
 * 递归问题列表：
@@ -316,7 +318,88 @@ def helper(rst,temp,pos,n,used_y,used_x_y,used_x_y_n):
 
 使用递归常遇到的一个问题就是因为递归深度过深引起的爆栈，内存溢出。
 
+**3 树遍历、二叉树搜索、全遍历、求树的深度、二叉搜索树查找、前序后序中序转换**
+
+根据树的preorder、inorder或者postorder、inorder构建二叉树
+```
+preorder = [3,9,20,15,7]
+inorder = [9,3,15,20,7]
+postorder = [9,15,7,20,3]
+```
+
+<div align="center"><img src="http://p7erlqn6k.bkt.clouddn.com/image/jpg/python/tree/013-tree.png" height="100%" width="20%"/></div>
+
+```python
+"""preorder+inorder"""
+class PreInRecoverBinaryTree:
+    def buildTree(self,preorder,inorder):
+        if preorder:
+            pre_start,pre_end,in_start,in_end = 0,len(preorder),0,len(inorder)
+            return self.helper(preorder,inorder,pre_start,pre_end,in_start,in_end)
+        return None
+    def helper(self,preorder,inorder,pre_start,pre_end,in_start,in_end):
+        if pre_start == pre_end:
+            return None
+        # 在inorder中寻找root
+        cur = in_start
+        while cur < in_end:
+            if inorder[cur] == preorder[pre_start]:
+                break
+            cur += 1
+        root = TreeNode(inorder[cur])
+        root.left = self.helper(preorder,inorder,pre_start+1,pre_start+cur-in_start+1,in_start,cur)
+        root.right = self.helper(preorder,inorder,pre_start+cur-in_start+1,pre_end,cur+1,in_end)
+        return root
+```
+
 递归问题还有很多，能用递归思路解决的问题都可以归纳为递归问题。树型左右子树结构天生可以利用递归来解决，更过的解法有待补充和在其他专题中呈现递归。
+
+后面的部分是递归解法题目的记录：
+---
+
+* Longest Substring with At Least K Repeating Characters
+
+>Find the length of the longest substring T of a given string（consists of lowercase letters only）such that every character in T appears no less than k times.
+
+>example:
+
+```
+input:
+s = 'aaabb',k = 3
+output:
+3
+The longest substring is 'aaa',as 'a' is repeated 3 times.
+
+input:
+s = 'ababbc',k = 2
+output:
+5
+The longest substring is 'ababb',as 'a' is repeated 2 times and 'b' is repeated 3 times.
+```
+
+题目要求子字符串中每个元素重复出现次数大于等于k个的最长子字符串的长度。乍一看题目比较复杂，要求符合条件的最长子字符串长度，怎样寻找符合元素重复个数大于等于k的子字符串？似乎可以用DP，因为遇到所谓“最长”。其实，此题不一定要用DP，或者说本题不适合DP算法来解。
+
+我们观察，如果一个字符在字符串中出现的次数`count(c)<k`，那么该字符必定不会出现在符合条件的子字符串中，我们怎么对待这些出现次数小于k的字符呢？直接将这些字符替换掉，以这些字符为分割线，将原来的字符串分割为多个不包含这些不符合条件字符的子字符串，我们想要的结果就在这些分割后的子字符串中，这里用到了**分治**的思想，分别在这些子字符串中寻找答案。因为这样的过程要不断的重复处理，我们使用递归来实现。递归的终止条件是什么？当字符串长度小于k时，就没有必要在处理了；或者字符串本身是一个满足条件的字符串，直接返回该字符串长度。我们要做的就是取最大值。
+
+```python
+class Solution:
+    def longestSubstring(self,s,k):
+        rst = 0
+        if len(s) < k:
+            return 0
+        cakes = sorted(Counter(s).most_common(),key= lambda item:item[1])
+        for cake in cakes:
+            if cake[1]<k:
+                s = s.replace(cake[0],'-')
+        if '-' not in s:
+            return len(s)
+        substrs = list(set(s.split('-')))
+        for substr in substrs:
+            rst = max(rst,self.longestSubstring(substr,k))
+        return rst
+```
+
+
 
 
 

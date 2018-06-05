@@ -529,100 +529,35 @@ def helper(postorder,post_start,post_end,inorder,in_start,in_end):
 # {1,2,3,#,4,#,5}
 ```
 
+二叉查找树的一个应用，二叉查找树区间搜索
 
+* 现给定二叉查找树的根节点root和两个值k1,k2，其中`k1 < k2`，找到所有满足`k1< key< k2`条件的节点的key值，并按照升序返回
+> 如下图所示二叉查找树，k1=10,k2=22 返回：[12,20,22] 
+> <div align="center"><img src="http://p7erlqn6k.bkt.clouddn.com/image/jpg/python/tree/011-tree.png" height="100%" width="25%"/></div>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-* 字典树Trie Tree
 ```python
-#trie tree demo
-class DFA(object):
-    _root = dict()
-
-    def init_tree(self,wordlist):
-        if wordlist:
-            for word in wordlist:
-                self.add_word(word)
-
-    def add_word(self,word):
-        root = self._root
-        for char in word:
-            if char not in root:
-                root[char] = dict()
-            root = root.get(char)
-        root['end'] = None
-
-    def filter(self,prestr):
-        if prestr:
-            prestr = list(prestr)
-            i = 0
-            while i<len(prestr):
-                start = i
-                end = self.search_tree(start,prestr)
-                if start==end:
-                    i += 1
-                else:
-                    prestr[start:end] = '*'*(end-start)
-                    i = end
-            return ''.join(prestr)
-
-    def search_tree(self,start,prestr):
-        root = self._root
-        end = temp = start
-
-        while root.get(prestr[temp]):
-            root = root.get(prestr[temp])
-            temp += 1
-            if 'end' in root:
-                end = temp
-                break
-        return end
-
-if __name__ == '__main__':
-    siwords = [
-        '法轮功',
-        '法轮大法',
-        '中国共产党',
-        '中共',
-        '上海帮',
-        '日本AV'
-    ]
-    prestr = '法日本AV我们知道法轮功是反中共的有力武器'
-
-    print(prestr)
-    dfa = DFA()
-    dfa.init_tree(siwords)
-    rst = dfa.filter(prestr)
-    print(rst)
-    """
-    法轮日本AV我们知道法轮功是反中共的有力武器
-    法轮****我们知道***是反**的有力武器
-    """
+def search_range(root,k1,k2):
+    rst = []
+    helper(rst,root,k1,k2)
+    rst = sorted(rst)
+    return rst
+def helper(rst,root,k1,k2):
+    if root == None:
+        return
+    if k1 <= root.data and root.data <= k2:
+        rst.append(root.data)
+    '''
+    # 下面的判断与上面的判断不重复
+    # 下面分开判断，只判断左、右分支是否可能存在符合条件的节点，符合条件的就递归
+    # 而具体是否符合条件，由上面具体的条件进行判断
+    '''
+    if k1 <= root.data:
+        helper(rst,root.left,k1,k2)
+    if root.data <= k2:
+        helper(rst,root.right,k1,k2)
 ```
 
-* priority queue
+* Priority Queue
 ```python
 """
     优先队列：
@@ -633,17 +568,46 @@ if __name__ == '__main__':
     堆：
         定义：堆是一种树形结构，是节点里存储数据的完全二叉树，另外堆中的节点要满足一定的堆序
         堆的特点：
-            见下图
+            (1)满足一定的堆序，最小堆？最大堆？
+            (2)堆是一颗完全二叉树
+            (3)堆的存储结构使用数组/list来实现
         思考：
             (1)如何实现堆的存储结构？
+                使用数组来实现。为什么能用数组实现？堆的结构同完全二叉树，由于完全二叉树的相关性质，其存储结构可以利用线性（数组）结构实现，故堆也可以由线性结构的数组来实现
+        堆与完全二叉树区别？
+            存储形式上没有区别，都用数组来实现
+            但堆区别于完全二叉树，要时刻满足堆序
+        堆与二叉查找树的区别？
+            二叉查找树：
+                (1)不一定是完全二叉树，可以是其他二叉树
+                (2)左子树<=当前节点，当前节点<=右子树
+            堆：
+                (1)必须是完全二叉树
+                (2)堆序：
+                    最小堆：当前节点值小于等于孩子节点值
+                    最大堆：当前节点值大于等于孩子节点值
         堆结构定义：
             init()
             shiftdown()
             shiftup()
+        堆的操作：
+            (1)初始化：
+                所有元素先全部加入队列
+                从n//2节点开始下沉每个元素，shiftdown
+            (2)添加一个元素：
+                添加元素到末尾
+                上浮shiftup元素
+            (3)取出一个元素：
+                取出heap[0]
+                将heap[-1]放置到heap[0]
+                下沉元素
+
         重点：堆与完全二叉树存储结构相同，故可以使用线性结构实现结构存储，通过对指针的操作，实现space O(1)复杂度，同时time O()也会下降
 """
 ```
-![P3 Markdown](http://p3yz9xz5w.bkt.clouddn.com/img/blog/heap1.png "堆的特点")
+
+<div align="center"><img src="http://p7erlqn6k.bkt.clouddn.com/image/jpg/python/tree/012-tree.png" height="100%" width="30%"/></div>
+
 ```python
 # 优先队列 + 堆 的实现
 """
@@ -722,9 +686,78 @@ class PriorityQueue(object):
 
     def pop(self):
         self.heap.pop_top()
+```
+
+* 第二次实现堆结构总结：
+> 下面代码是第二次实现堆的代码，代码是自己根据原理没有参考其他资料（shiftdown参考了书上的思路）实现的，代码功能没有问题。
+
+* 代码的问题：
+    1. 初始化堆同add one代码一样，都是一个一个加入。这里要注意，书上标准的堆在初始化时是全部加入数组，从(n//2)开始执行下沉操作的； 
+    2. 代码中频繁使用self.heap操作，标准写法中用临时变量heap，不经常使用self.heap； 
+    3. 上浮和下沉操作，标准代码结构更完善，不使用swap，效率更高；
+    4. 注意下沉shiftdown代码while部分对最小子节点选取的思路。
+
+贴下代码，供比较
+```python
+class Heap(object):
+    def __init__(self):
+        self.heap = []
+    def init_heap(self,datas):
+        if datas:
+            for data in datas:
+                self.add_element(data)
+    def add_element(self,data):
+        self.heap.append(data)
+        self.shiftup()
+
+    def add_one(self,data):
+        self.heap.append(data)
+        self.shiftup()
+
+    def pick_one(self):
+        if self.heap:
+            data = self.heap[0]
+            self.heap[0] = self.heap[-1]
+            self.heap.pop()
+            if self.heap:
+                self.shiftdown()
+            return data
+        return -1
+
+    def shiftup(self):
+        pos = len(self.heap)-1
+        while (pos-1)//2 >= 0:
+            temp = (pos-1)//2
+            if self.heap[pos] < self.heap[temp]:
+                self.heap[pos],self.heap[temp] = self.heap[temp],self.heap[pos]
+                pos = temp
+            else:
+                break
+
+    def shiftdown(self):
+        if self.heap:
+            cur = 0
+            # while 2*cur+1<len(self.heap) or 2*cur+2<len(self.heap):
+            # 下面的代码解决了上面代码的问题，先判断一个，符合条件后再判断另外一个
+            # 下面的代码是参考书上的思路
+            while 2*cur+1<len(self.heap):
+                temp = 2*cur+1
+                if temp+1<len(self.heap) and self.heap[temp+1] < self.heap[temp]:
+                    temp = temp + 1
+                if self.heap[temp] >= self.heap[cur]:
+                    break
+                self.heap[cur],self.heap[temp] = self.heap[temp],self.heap[cur]
+                cur = temp
+```
+
+ajdsjf
 
 
+
+
+```python
 """
+    堆排序：
     注意：
         1 需要明确，堆的功能就是确保每次弹出堆顶的元素是当前堆中权重的最值，对应小顶堆中，每次弹出的元素都是当前堆中的最小值
         2 弹出的元素需要存放，在不借助额外空间的情况下，将弹出的元素存放到线性结构对应尾部
@@ -749,4 +782,72 @@ if __name__ == '__main__':
     print(top_num)  # 1
     print(heap.get_heap()) # [2, 2, 4, 3, 6]
 
+```
+
+
+* 字典树Trie Tree
+```python
+#trie tree demo
+class DFA(object):
+    _root = dict()
+
+    def init_tree(self,wordlist):
+        if wordlist:
+            for word in wordlist:
+                self.add_word(word)
+
+    def add_word(self,word):
+        root = self._root
+        for char in word:
+            if char not in root:
+                root[char] = dict()
+            root = root.get(char)
+        root['end'] = None
+
+    def filter(self,prestr):
+        if prestr:
+            prestr = list(prestr)
+            i = 0
+            while i<len(prestr):
+                start = i
+                end = self.search_tree(start,prestr)
+                if start==end:
+                    i += 1
+                else:
+                    prestr[start:end] = '*'*(end-start)
+                    i = end
+            return ''.join(prestr)
+
+    def search_tree(self,start,prestr):
+        root = self._root
+        end = temp = start
+
+        while root.get(prestr[temp]):
+            root = root.get(prestr[temp])
+            temp += 1
+            if 'end' in root:
+                end = temp
+                break
+        return end
+
+if __name__ == '__main__':
+    siwords = [
+        '法轮功',
+        '法轮大法',
+        '中国共产党',
+        '中共',
+        '上海帮',
+        '日本AV'
+    ]
+    prestr = '法日本AV我们知道法轮功是反中共的有力武器'
+
+    print(prestr)
+    dfa = DFA()
+    dfa.init_tree(siwords)
+    rst = dfa.filter(prestr)
+    print(rst)
+    """
+    法轮日本AV我们知道法轮功是反中共的有力武器
+    法轮****我们知道***是反**的有力武器
+    """
 ```
